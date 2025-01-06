@@ -23,6 +23,9 @@ outputs:
   image-uri:
     description: 'The complete image URI'
     value: ${{ steps.set-tag.outputs.image_uri }}
+  image-tag:
+    description: 'The image tag'
+    value: ${{ steps.set-tag.outputs.image_tag }}
 
 runs:
   using: 'composite'
@@ -42,4 +45,5 @@ runs:
           echo "No valid environment name found: ${{ inputs.env-name }}"
           exit 1
         fi
+        echo "image_tag=$TAG" >> $GITHUB_OUTPUT 
         echo "image_uri=${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:$TAG" >> $GITHUB_OUTPUT 
