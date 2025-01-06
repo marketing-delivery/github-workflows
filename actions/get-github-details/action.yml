@@ -12,6 +12,8 @@ outputs:
   truncated_branch_name:
     description: 'Formatted and truncated branch name for S3 bucket naming'
   pr_prefix:
+    description: 'Prefix containing the Pull Request number for feature branches'
+  pr_number:
     description: 'Pull Request number for feature branches'
 runs:
   using: 'composite'
