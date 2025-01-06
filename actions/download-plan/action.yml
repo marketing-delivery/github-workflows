@@ -1,0 +1,25 @@
+name: 'Download Terraform Plan'
+description: 'Downloads terraform plan and artifacts from S3 and sets permissions'
+
+inputs:
+  artefact-bucket:
+    description: 'S3 bucket containing the artifacts'
+    required: true
+  unique-id:
+    description: 'Unique identifier for the build'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download build artifacts from S3
+      shell: bash
+      run: |
+        S3_BUCKET=${{ inputs.artefact-bucket }}
+        REPO_NAME=${GITHUB_REPOSITORY#marketing-delivery/}
+        UNIQUE_ID=${{ inputs.unique-id }}
+        aws s3 cp --recursive s3://$S3_BUCKET/$REPO_NAME/$UNIQUE_ID/tf-plan .
+    
+    - name: Set execute permissions on Terraform providers
+      shell: bash
+      run: chmod -R +x .terraform 

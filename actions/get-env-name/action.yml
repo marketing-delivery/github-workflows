@@ -1,0 +1,29 @@
+name: 'Set Environment Name'
+description: 'Determines the environment name based on branch or tag'
+
+outputs:
+  env_name:
+    description: 'The determined environment name (UAT, PROD, TEST,or FEATURE)'
+    value: ${{ steps.set-env.outputs.env_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: set-env
+      shell: bash
+      run: |
+        echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+        echo "GITHUB_REF: ${GITHUB_REF}"
+        
+        if [[ "${GITHUB_REF}" == "refs/heads/master" ]]; then
+          echo "env_name=UAT" >> $GITHUB_OUTPUT
+        elif [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
+          echo "env_name=TEST" >> $GITHUB_OUTPUT
+        elif [[ "${GITHUB_REF}" == "refs/tags/v"* ]]; then
+          echo "env_name=PROD" >> $GITHUB_OUTPUT
+        elif [[ "${GITHUB_HEAD_REF}" == "feature/"* ]]; then
+          echo "env_name=FEATURE" >> $GITHUB_OUTPUT
+        fi
+    
+    - shell: bash
+      run: echo "Environment name is ${{ steps.set-env.outputs.env_name }}" 

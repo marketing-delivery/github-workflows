@@ -1,0 +1,24 @@
+name: 'Upload Terraform Plan'
+description: 'Uploads Terraform plan and related files to S3'
+
+inputs:
+  artefact-bucket:
+    description: 'S3 bucket to store artifacts'
+    required: true
+  unique-id:
+    description: 'Unique identifier for the artifacts'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Upload build artifacts to S3
+      shell: bash
+      run: |
+        S3_BUCKET=${{ inputs.artefact-bucket }}
+        REPO_NAME=${GITHUB_REPOSITORY#marketing-delivery/}
+        UNIQUE_ID=${{ inputs.unique-id }}
+        aws s3 cp *.tf s3://$S3_BUCKET/$REPO_NAME/$UNIQUE_ID/tf-plan/
+        aws s3 cp tf.plan s3://$S3_BUCKET/$REPO_NAME/$UNIQUE_ID/tf-plan/
+        aws s3 cp .terraform.lock.hcl s3://$S3_BUCKET/$REPO_NAME/$UNIQUE_ID/tf-plan/
+        aws s3 cp --recursive .terraform s3://$S3_BUCKET/$REPO_NAME/$UNIQUE_ID/tf-plan/.terraform 

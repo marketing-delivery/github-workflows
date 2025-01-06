@@ -1,0 +1,47 @@
+name: 'Get GitHub Details'
+description: 'Extracts and formats repository and branch information from GitHub context'
+outputs:
+  version:
+    description: 'Version from tag reference'
+  repo:
+    description: 'Repository name without organization prefix'
+  unique_id:
+    description: 'Unique run ID'
+  branch_name:
+    description: 'Branch name without feature/ prefix'
+  truncated_branch_name:
+    description: 'Formatted and truncated branch name for S3 bucket naming'
+  pr_prefix:
+    description: 'Pull Request number for feature branches'
+runs:
+  using: 'composite'
+  steps:
+    - name: Extract GitHub details
+      shell: bash
+      run: |
+        branch_name=$(echo "${GITHUB_HEAD_REF#feature/}")
+        version=$(echo "${GITHUB_REF#refs/tags/}")
+
+        formatted_head_ref=$(echo "${GITHUB_REPOSITORY#marketing-delivery/}-${GITHUB_HEAD_REF#feature/}" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-' | sed -e 's/^[-]*//' -e 's/[-]*$//')
+        echo ${formatted_head_ref}
+        # Ensure the formatted head ref meets the length requirements (3-63 characters)
+        if [ ${#formatted_head_ref} -lt 3 ]; then
+          formatted_head_ref="${formatted_head_ref}$(head /dev/urandom | tr -dc 'a-z0-9' | head -c $((3 - ${#formatted_head_ref})))"
+        fi
+        formatted_head_ref=${formatted_head_ref:0:58} # Max characters for buckets (63) minus the suffix (5) is 58 characters
+
+        # Extract PR number if it exists
+        pr_prefix=""
+        pr_number=""
+        if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+          pr_number="PR$(jq -r '.pull_request.number' $GITHUB_EVENT_PATH)"
+          pr_prefix="${pr_number}."
+        fi
+
+        echo "version=${version}" >> $GITHUB_OUTPUT
+        echo "repo=${GITHUB_REPOSITORY#marketing-delivery/}" >> $GITHUB_OUTPUT
+        echo "unique_id=${GITHUB_RUN_ID}" >> $GITHUB_OUTPUT
+        echo "branch_name=${branch_name}" >> $GITHUB_OUTPUT
+        echo "truncated_branch_name=${formatted_head_ref}" >> $GITHUB_OUTPUT
+        echo "pr_prefix=${pr_prefix}" >> $GITHUB_OUTPUT
+        echo "pr_number=${pr_number}" >> $GITHUB_OUTPUT

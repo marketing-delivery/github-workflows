@@ -1,0 +1,45 @@
+name: 'Get Image Tag'
+description: 'Determines the appropriate image tag based on environment'
+
+inputs:
+  env-name:
+    description: 'Environment name (FEATURE, TEST, UAT, PROD)'
+    required: true
+  feature-name:
+    description: 'Feature name (for feature branches)'
+    required: true
+  version:
+    description: 'Version tag (for PROD)'
+    required: false
+    default: ''
+  ecr-registry:
+    description: 'ECR registry URL'
+    required: true
+  ecr-repository:
+    description: 'ECR repository name'
+    required: true
+
+outputs:
+  image-uri:
+    description: 'The complete image URI'
+    value: ${{ steps.set-tag.outputs.image_uri }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: set-tag
+      shell: bash
+      run: |
+        if [ "${{ inputs.env-name }}" = "FEATURE" ]; then
+          TAG="feature-${{ inputs.feature-name }}${{ github.sha }}"
+        elif [ "${{ inputs.env-name }}" = "TEST" ]; then
+          TAG="test-${{ github.sha }}"
+        elif [ "${{ inputs.env-name }}" = "UAT" ]; then
+          TAG="uat-${{ github.sha }}"
+        elif [ "${{ inputs.env-name }}" = "PROD" ]; then
+          TAG="prod-${{ inputs.version }}-${{ github.sha }}"
+        else
+          echo "No valid environment name found: ${{ inputs.env-name }}"
+          exit 1
+        fi
+        echo "image_uri=${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:$TAG" >> $GITHUB_OUTPUT 
