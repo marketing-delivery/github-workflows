@@ -1,0 +1,31 @@
+name: 'Get API Domain'
+description: 'Determines the API domain based on environment name'
+
+inputs:
+  env-name:
+    description: 'Environment name (PROD, UAT, TEST, etc.)'
+    required: true
+  pr-number:
+    description: 'Pull request number'
+    required: true
+
+outputs:
+  domain:
+    description: 'The determined API domain'
+    value: ${{ steps.set-domain.outputs.domain }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: set-domain
+      shell: bash
+      run: |
+        if [ "${{ inputs.env-name }}" = "PROD" ]; then
+          echo "domain=scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "UAT" ]; then
+          echo "domain=uat.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "TEST" ]; then
+          echo "domain=test.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+        else
+          echo "domain=${{ inputs.env-name }}-${{ inputs.pr-number }}.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+        fi 
