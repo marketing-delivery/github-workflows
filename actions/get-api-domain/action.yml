@@ -8,11 +8,15 @@ inputs:
   pr-number:
     description: 'Pull request number'
     required: true
+  project-name:
+    description: 'Project name'
+    required: true
+  
 
 outputs:
-  domain:
+  subdomain:
     description: 'The determined API domain'
-    value: ${{ steps.set-domain.outputs.domain }}
+    value: ${{ steps.set-domain.outputs.subdomain }}
 
 runs:
   using: 'composite'
@@ -21,11 +25,11 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.env-name }}" = "PROD" ]; then
-          echo "domain=scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+          echo "subdomain=${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.env-name }}" = "UAT" ]; then
-          echo "domain=uat.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+          echo "subdomain=uat.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
-          echo "domain=test.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+          echo "subdomain=test.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         else
-          echo "domain=${{ inputs.env-name }}-${{ inputs.pr-number }}.scheduler.voicebox.internal" >> $GITHUB_OUTPUT
+          echo "subdomain=pr-${{ inputs.pr-number }}.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         fi 
