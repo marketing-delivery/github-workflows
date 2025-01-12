@@ -20,6 +20,13 @@ runs:
   steps:
     - name: Extract GitHub details
       shell: bash
+      env:
+        GITHUB_EVENT_PATH: ${{ github.event_path }}
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_HEAD_REF: ${{ github.head_ref }}
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
       run: |
         branch_name=$(echo "${GITHUB_HEAD_REF#feature/}")
         version=$(echo "${GITHUB_REF#refs/tags/}")
@@ -40,8 +47,11 @@ runs:
           pr_prefix="${pr_number}."
         fi
 
+        # Extract repository name, handling both PR and non-PR cases
+        repo_name=${GITHUB_REPOSITORY#*/}
+
         echo "version=${version}" >> $GITHUB_OUTPUT
-        echo "repo=${GITHUB_REPOSITORY#marketing-delivery/}" >> $GITHUB_OUTPUT
+        echo "repo=${repo_name}" >> $GITHUB_OUTPUT
         echo "unique_id=${GITHUB_RUN_ID}" >> $GITHUB_OUTPUT
         echo "branch_name=${branch_name}" >> $GITHUB_OUTPUT
         echo "truncated_branch_name=${formatted_head_ref}" >> $GITHUB_OUTPUT
