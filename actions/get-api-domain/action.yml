@@ -31,5 +31,5 @@ runs:
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
           echo "subdomain=test.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         else
-          echo "subdomain=pr-${{ inputs.pr-number }}.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
+          echo "subdomain=pr${{ inputs.pr-number }}.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
         fi 
