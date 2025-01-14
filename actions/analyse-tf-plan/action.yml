@@ -1,1 +1,41 @@
- 
+ name: 'Analyze Terraform Plan'
+description: 'Analyzes terraform plan output and extracts summary and changes'
+
+inputs:
+  plan-output:
+    description: 'The output from terraform plan'
+    required: true
+
+outputs:
+  summary:
+    description: 'The plan summary line'
+  has_changes:
+    description: 'Boolean indicating if there are changes'
+  changes:
+    description: 'Detailed changes section'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Analyze Plan
+      shell: bash
+      run: |
+        # Save plan output to file
+        echo '${{ inputs.plan-output }}' > plan_output.txt
+        
+        # Extract the Plan line (with more flexible matching)
+        echo 'SUMMARY<<EOF' >> $GITHUB_OUTPUT
+        grep -i "^[[:space:]]*plan:" plan_output.txt >> $GITHUB_OUTPUT || echo "No plan summary found"
+        echo 'EOF' >> $GITHUB_OUTPUT
+        
+        # Check for changes
+        if grep -q "No changes." plan_output.txt; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
+        
+        # Extract changes section with more reliable markers
+        echo 'CHANGES<<EOF' >> $GITHUB_OUTPUT
+        sed -n '/Terraform used the selected providers/,/^Plan:/{ /^Plan:/!p }' plan_output.txt >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
