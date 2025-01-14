@@ -1,4 +1,4 @@
- name: 'Analyze Terraform Plan'
+name: 'Analyze Terraform Plan'
 description: 'Analyzes terraform plan output and extracts summary and changes'
 
 inputs:
