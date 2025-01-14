@@ -28,6 +28,11 @@ runs:
         GITHUB_REF: ${{ github.ref }}
         GITHUB_RUN_ID: ${{ github.run_id }}
       run: |
+        # Debug: Print event name and event file contents
+        echo "Event name: $GITHUB_EVENT_NAME"
+        echo "Event file contents:"
+        cat $GITHUB_EVENT_PATH
+
         branch_name=$(echo "${GITHUB_HEAD_REF#feature/}")
         version=$(echo "${GITHUB_REF#refs/tags/}")
 
@@ -43,7 +48,9 @@ runs:
         pr_prefix=""
         pr_number=""
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-          pr_number="PR$(jq -r '.pull_request.number' $GITHUB_EVENT_PATH)"
+          echo "Processing pull request event..."
+          pr_number="PR$(jq -r '.pull_request.number // empty' $GITHUB_EVENT_PATH)"
+          echo "Extracted PR number: $pr_number"
           pr_prefix="${pr_number}."
         fi
 
