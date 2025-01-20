@@ -9,15 +9,19 @@ inputs:
 outputs:
   summary:
     description: 'The plan summary line'
+    value: ${{ steps.analyse-tf-plan.outputs.summary }}
   has_changes:
     description: 'Boolean indicating if there are changes'
+    value: ${{ steps.analyse-tf-plan.outputs.has_changes }}
   changes:
     description: 'Detailed changes section'
+    value: ${{ steps.analyse-tf-plan.outputs.changes }}
 
 runs:
   using: 'composite'
   steps:
     - name: Analyze Plan
+      id: analyse-tf-plan
       shell: bash
       run: |
         # Save plan output to file
@@ -29,9 +33,11 @@ runs:
         echo 'EOF' >> $GITHUB_OUTPUT
         
         # Check for changes
-        if grep -q "No changes." plan_output.txt; then
+        if grep -q "No changes." plan_output.txt; then 
+          echo "has_changes=false"
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
+          echo "has_changes=true"
           echo "has_changes=true" >> $GITHUB_OUTPUT
         fi
         
