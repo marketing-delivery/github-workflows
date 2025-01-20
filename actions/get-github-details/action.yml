@@ -3,22 +3,30 @@ description: 'Extracts and formats repository and branch information from GitHub
 outputs:
   version:
     description: 'Version from tag reference'
+    value: ${{ steps.extract-github-details.outputs.version }}
   repo:
     description: 'Repository name without organization prefix'
+    value: ${{ steps.extract-github-details.outputs.repo }}
   unique_id:
     description: 'Unique run ID'
+    value: ${{ steps.extract-github-details.outputs.unique_id }}
   branch_name:
     description: 'Branch name without feature/ prefix'
+    value: ${{ steps.extract-github-details.outputs.branch_name }}
   truncated_branch_name:
     description: 'Formatted and truncated branch name for S3 bucket naming'
+    value: ${{ steps.extract-github-details.outputs.truncated_branch_name }}
   pr_prefix:
     description: 'Prefix containing the Pull Request number for feature branches'
+    value: ${{ steps.extract-github-details.outputs.pr_prefix }}
   pr_number:
     description: 'Pull Request number for feature branches'
+    value: ${{ steps.extract-github-details.outputs.pr_number }}
 runs:
   using: 'composite'
   steps:
     - name: Extract GitHub details
+      id: extract-github-details
       shell: bash
       env:
         GITHUB_EVENT_PATH: ${{ github.event_path }}
