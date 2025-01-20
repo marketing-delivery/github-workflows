@@ -49,10 +49,23 @@ runs:
         pr_number=""
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
           echo "Processing pull request event..."
+          echo "Event file path: $GITHUB_EVENT_PATH"
+          echo "Raw event file contents:"
+          cat $GITHUB_EVENT_PATH
+          
           pr_number="PR$(jq -r '.pull_request.number // empty' $GITHUB_EVENT_PATH)"
           echo "Extracted PR number: $pr_number"
+          echo "jq command output: $(jq '.pull_request.number' $GITHUB_EVENT_PATH)"
+          
           pr_prefix="${pr_number}."
+          echo "Set pr_prefix to: $pr_prefix"
+        else
+          echo "Not a pull request event. Event name: $GITHUB_EVENT_NAME"
         fi
+
+        # Debug final values
+        echo "Final pr_number value: $pr_number"
+        echo "Final pr_prefix value: $pr_prefix"
 
         # Extract repository name, handling both PR and non-PR cases
         repo_name=${GITHUB_REPOSITORY#*/}
