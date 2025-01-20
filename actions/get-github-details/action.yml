@@ -7,6 +7,9 @@ outputs:
   repo:
     description: 'Repository name without organization prefix'
     value: ${{ steps.extract-github-details.outputs.repo }}
+  repo_url:
+    description: 'Repository URL'
+    value: ${{ steps.extract-github-details.outputs.repo_url }}
   unique_id:
     description: 'Unique run ID'
     value: ${{ steps.extract-github-details.outputs.unique_id }}
@@ -36,9 +39,6 @@ runs:
         GITHUB_REF: ${{ github.ref }}
         GITHUB_RUN_ID: ${{ github.run_id }}
       run: |
-        # Debug: Print event name and event file contents
-        echo "Event name: $GITHUB_EVENT_NAME"
-
         branch_name=$(echo "${GITHUB_HEAD_REF#feature/}")
         version=$(echo "${GITHUB_REF#refs/tags/}")
 
@@ -50,34 +50,23 @@ runs:
         fi
         formatted_head_ref=${formatted_head_ref:0:58} # Max characters for buckets (63) minus the suffix (5) is 58 characters
 
-        # Extract PR number if it exists
         pr_prefix=""
         pr_number=""
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
           echo "Processing pull request event..."
-          
-          # Extract PR number directly from the number field
           pr_number=$(jq -r '.number // empty' $GITHUB_EVENT_PATH)
-          echo "Extracted PR number: $pr_number"
-          
           pr_prefix="pr${pr_number}."
-          echo "Set pr_prefix to: $pr_prefix"
         else
           echo "Not a pull request event. Event name: $GITHUB_EVENT_NAME"
         fi
 
-        # Debug final values
-        echo "Final pr_number value: $pr_number"
-        echo "Final pr_prefix value: $pr_prefix"
-
-        # Extract repository name
-        repo_name=${GITHUB_REPOSITORY#*/}
-
         # Set outputs
           echo "version=${version}"
           echo "version=${version}" >> $GITHUB_OUTPUT
-          echo "repo=${repo_name}"
-          echo "repo=${repo_name}" >> $GITHUB_OUTPUT
+          echo "repo=${GITHUB_REPOSITORY#*/}"
+          echo "repo=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
+          echo "repo_url=https://github.com/${GITHUB_REPOSITORY}"
+          echo "repo_url=https://github.com/${GITHUB_REPOSITORY}" >> $GITHUB_OUTPUT
           echo "unique_id=${GITHUB_RUN_ID}"
           echo "unique_id=${GITHUB_RUN_ID}" >> $GITHUB_OUTPUT
           echo "branch_name=${branch_name}"
