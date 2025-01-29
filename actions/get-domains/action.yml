@@ -1,0 +1,46 @@
+name: 'Get Domain'
+description: 'Determines the API domain based on environment name'
+
+inputs:
+  env-name:
+    description: 'Environment name (PROD, UAT, TEST, etc.)'
+    required: true
+  pr-number:
+    description: 'Pull request number'
+    required: true
+  suffix:
+    description: 'Suffix for the subdomain'
+    required: true
+  api-prefix:
+    description: 'Prefix for the subdomain'
+    required: false
+  
+
+outputs:
+  api-subdomain:
+    description: 'The determined API domain'
+    value: ${{ steps.set-domain.outputs.api_subdomain }}
+  subdomain:
+    description: 'The determined API domain'
+    value: ${{ steps.set-domain.outputs.subdomain }}
+
+
+runs:
+  using: 'composite'
+  steps:
+    - id: set-domain
+      shell: bash
+      run: |
+        if [ "${{ inputs.env-name }}" = "PROD" ]; then
+          echo "api_subdomain=${{ inputs.api-prefix }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          echo "subdomain=${{inputs.suffix}}" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "UAT" ]; then
+          echo "api_subdomain=${{ inputs.api-prefix }}.uat.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          echo "subdomain=uat.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "TEST" ]; then
+          echo "api_subdomain=${{ inputs.api-prefix }}.test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          echo "subdomain=test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "FEATURE" ]; then
+          echo "api_subdomain=${{ inputs.api-prefix }}.pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          echo "subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+        fi 
