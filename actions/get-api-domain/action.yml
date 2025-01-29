@@ -8,9 +8,12 @@ inputs:
   pr-number:
     description: 'Pull request number'
     required: true
-  project-name:
-    description: 'Project name'
+  suffix:
+    description: 'Suffix for the subdomain'
     required: true
+  prefix:
+    description: 'Prefix for the subdomain'
+    required: false
   
 
 outputs:
@@ -25,11 +28,11 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.env-name }}" = "PROD" ]; then
-          echo "subdomain=${{ inputs.project-name }}" >> $GITHUB_OUTPUT
+          echo "subdomain=${{ inputs.prefix }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.env-name }}" = "UAT" ]; then
-          echo "subdomain=uat.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
+          echo "subdomain=${{ inputs.prefix }}.uat.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
-          echo "subdomain=test.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
-        else
-          echo "subdomain=pr${{ inputs.pr-number }}.${{ inputs.project-name }}" >> $GITHUB_OUTPUT
+          echo "subdomain=${{ inputs.prefix }}.test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+        elif [ "${{ inputs.env-name }}" = "FEATURE" ]; then
+          echo "subdomain=${{ inputs.prefix }}.pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
         fi 
