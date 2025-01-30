@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.env-name }}" = "FEATURE" ]; then
-          TAG="feature-${{ inputs.feature-name }}${{ github.sha }}"
+          TAG="feature-pr${{ inputs.feature-name }}-${{ github.sha }}"
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
           TAG="test-${{ github.sha }}"
         elif [ "${{ inputs.env-name }}" = "UAT" ]; then
