@@ -54,7 +54,7 @@ runs:
           echo "subdomain=test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
         elif [ "${{ inputs.env-name }}" = "FEATURE" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
-            echo "api_subdomain=${{ inputs.api-prefix }}.pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+            echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.api-prefix }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
           else
             echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
           fi
