@@ -18,12 +18,23 @@ runs:
     - name: Add domain to QuickSight
       shell: bash
       run: |
+        aws quicksight list-namespaces \
+          --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+          --region ${{ inputs.aws-region }} \
+          --output text
+
+
         # Get current allowed domains
         CURRENT_DOMAINS=$(aws quicksight describe-namespace \
           --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
-          --namespace default \
+          --namespace mdquicksight \
           --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains[]' \
           --output text)
+        
+        # Handle case where no domains exist yet
+        if [ "$CURRENT_DOMAINS" = "None" ]; then
+          CURRENT_DOMAINS=""
+        fi
         
         # Check if domain already exists
         if echo "$CURRENT_DOMAINS" | grep -q "^${{ inputs.domain }}$"; then
@@ -31,7 +42,11 @@ runs:
         else
           echo "Adding ${{ inputs.domain }} to QuickSight allowed domains"
           # Add new domain to existing domains
-          UPDATED_DOMAINS="${CURRENT_DOMAINS},${{ inputs.domain }}"
+          if [ -z "$CURRENT_DOMAINS" ]; then
+            UPDATED_DOMAINS="${{ inputs.domain }}"
+          else
+            UPDATED_DOMAINS="${CURRENT_DOMAINS},${{ inputs.domain }}"
+          fi
           
           if [ "${{ inputs.read-only }}" = "true" ]; then
             echo "Read-only mode. Command that would be executed:"
@@ -43,11 +58,11 @@ runs:
               --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}"
           else
             # Execute the update command
-            # aws quicksight update-namespace \
-            #   --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
-            #   --namespace default \
-            #   --region ${{ inputs.aws-region }} \
-            #   --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}
+            #aws quicksight update-namespace \
+            #  --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+            #  --namespace default \
+            #  --region ${{ inputs.aws-region }} \
+            #  --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}
             echo "Successfully added ${{ inputs.domain }} to QuickSight allowed domains"
           fi
         fi
