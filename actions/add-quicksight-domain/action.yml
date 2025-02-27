@@ -33,20 +33,21 @@ runs:
           # Add new domain to existing domains
           UPDATED_DOMAINS="${CURRENT_DOMAINS},${{ inputs.domain }}"
           
-          # Create the update command
-          # UPDATE_CMD="aws quicksight update-namespace \
-          #   --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
-          #   --namespace default \
-          #   --region ${{ inputs.aws-region }} \
-          #   --quicksight-namespace-configuration \"AllowedDomains=${UPDATED_DOMAINS}\""
-          
           if [ "${{ inputs.read-only }}" = "true" ]; then
             echo "Read-only mode. Command that would be executed:"
-            echo "$UPDATED_DOMAINS"
-            # echo "$UPDATE_CMD"
+            echo "UPDATED_DOMAINS: $UPDATED_DOMAINS"
+            echo "aws quicksight update-namespace \
+              --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+              --namespace default \
+              --region ${{ inputs.aws-region }} \
+              --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}"
           else
             # Execute the update command
-            # eval "$UPDATE_CMD"
-            # echo "Successfully added ${{ inputs.domain }} to QuickSight allowed domains"
+            # aws quicksight update-namespace \
+            #   --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+            #   --namespace default \
+            #   --region ${{ inputs.aws-region }} \
+            #   --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}
+            echo "Successfully added ${{ inputs.domain }} to QuickSight allowed domains"
           fi
         fi
