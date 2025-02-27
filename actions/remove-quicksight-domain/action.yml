@@ -36,19 +36,20 @@ runs:
           UPDATED_DOMAINS=$(echo "$CURRENT_DOMAINS" | tr ',' '\n' | grep -v "^${{ inputs.domain }}$" | paste -sd,)
           
           # Create the update command
-          # UPDATE_CMD="aws quicksight update-namespace \
-          #   --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
-          #   --namespace default \
-          #   --region ${{ inputs.aws-region }} \
-          #   --quicksight-namespace-configuration \"AllowedDomains=${UPDATED_DOMAINS}\""
+          UPDATE_CMD="aws quicksight update-namespace \
+            --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+            --namespace default \
+            --region ${{ inputs.aws-region }} \
+            --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}"
           
           if [ "${{ inputs.read-only }}" = "true" ]; then
             echo "Read-only mode. Command that would be executed:"
-            echo "$UPDATED_DOMAINS"
-            # echo "$UPDATE_CMD"
+            echo "UPDATED_DOMAINS: $UPDATED_DOMAINS"
+            echo "$UPDATE_CMD"
           else
             # Execute the update command
             # eval "$UPDATE_CMD"
-            # echo "Successfully removed ${{ inputs.domain }} from QuickSight allowed domains"
+            echo "$UPDATED_DOMAINS"
+            echo "Successfully removed ${{ inputs.domain }} from QuickSight allowed domains"
           fi
         fi
