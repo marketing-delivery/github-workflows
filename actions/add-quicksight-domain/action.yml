@@ -29,28 +29,13 @@ runs:
           --query 'Namespaces[].Name' \
           --output text)
         
-        echo "Found namespaces: $NAMESPACES"
-        
-        # Loop through each namespace and get its domains
-        for NAMESPACE in $NAMESPACES; do
-          echo "Checking namespace: $NAMESPACE"
-          CURRENT_DOMAINS=$(aws quicksight describe-namespace \
-            --aws-account-id $ACCOUNT_ID \
-            --namespace $NAMESPACE \
-            --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains' \
-            --output json | jq -r 'if . == null then "No domains configured" else join("\n  - ") end')
-          
-          echo "Allowed domains in namespace '$NAMESPACE':"
-          echo "  - $CURRENT_DOMAINS"
-        done
-        
-        # Continue with the domain addition in the default namespace
-        NAMESPACE="default"
-        CURRENT_DOMAINS=$(aws quicksight describe-namespace \
+        CURRENT_DOMAINS=$(aws quicksight describe-account-settings \
           --aws-account-id $ACCOUNT_ID \
-          --namespace $NAMESPACE \
-          --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains' \
+          --region ${{ inputs.aws-region }} \
+          --query 'AccountSettings.AllowedDomains' \
           --output json | jq -r 'if . == null then "" else join(",") end')
+        echo "Found namespaces: $NAMESPACES"
+        echo "Current allowed domains: $CURRENT_DOMAINS"
         
         # Check if domain already exists
         if echo "$CURRENT_DOMAINS" | tr ',' '\n' | grep -q "^${{ inputs.domain }}$"; then
@@ -67,18 +52,16 @@ runs:
           if [ "${{ inputs.read-only }}" = "true" ]; then
             echo "Read-only mode. Command that would be executed:"
             echo "UPDATED_DOMAINS: $UPDATED_DOMAINS"
-            echo "aws quicksight update-namespace \
+            echo "            aws quicksight update-account-settings \
               --aws-account-id $ACCOUNT_ID \
-              --namespace default \
               --region ${{ inputs.aws-region }} \
-              --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}"
+              --allowed-domains ${UPDATED_DOMAINS}"
           else
             # Execute the update command
-            #aws quicksight update-namespace \
+            # aws quicksight update-account-settings \
             #  --aws-account-id $ACCOUNT_ID \
-            #  --namespace default \
             #  --region ${{ inputs.aws-region }} \
-            #  --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}
+            #  --allowed-domains ${UPDATED_DOMAINS}
             echo "Successfully added ${{ inputs.domain }} to QuickSight allowed domains"
           fi
         fi
