@@ -12,32 +12,48 @@ inputs:
     description: 'If true, only prints the command without executing it'
     required: false
     default: 'false'
+
 runs:
   using: 'composite'
   steps:
     - name: Add domain to QuickSight
       shell: bash
       run: |
-        aws quicksight list-namespaces \
-          --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        echo "ACCOUNT_ID: $ACCOUNT_ID"
+
+        # Get current namespaces
+        NAMESPACES=$(aws quicksight list-namespaces \
+          --aws-account-id $ACCOUNT_ID \
           --region ${{ inputs.aws-region }} \
-          --output text
-
-
-        # Get current allowed domains
-        CURRENT_DOMAINS=$(aws quicksight describe-namespace \
-          --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
-          --namespace mdquicksight \
-          --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains[]' \
+          --query 'Namespaces[].Name' \
           --output text)
         
-        # Handle case where no domains exist yet
-        if [ "$CURRENT_DOMAINS" = "None" ]; then
-          CURRENT_DOMAINS=""
-        fi
+        echo "Found namespaces: $NAMESPACES"
+        
+        # Loop through each namespace and get its domains
+        for NAMESPACE in $NAMESPACES; do
+          echo "Checking namespace: $NAMESPACE"
+          CURRENT_DOMAINS=$(aws quicksight describe-namespace \
+            --aws-account-id $ACCOUNT_ID \
+            --namespace $NAMESPACE \
+            --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains' \
+            --output json | jq -r 'if . == null then "No domains configured" else join("\n  - ") end')
+          
+          echo "Allowed domains in namespace '$NAMESPACE':"
+          echo "  - $CURRENT_DOMAINS"
+        done
+        
+        # Continue with the domain addition in the default namespace
+        NAMESPACE="default"
+        CURRENT_DOMAINS=$(aws quicksight describe-namespace \
+          --aws-account-id $ACCOUNT_ID \
+          --namespace $NAMESPACE \
+          --query 'Namespace.QuicksightNamespaceConfiguration.AllowedDomains' \
+          --output json | jq -r 'if . == null then "" else join(",") end')
         
         # Check if domain already exists
-        if echo "$CURRENT_DOMAINS" | grep -q "^${{ inputs.domain }}$"; then
+        if echo "$CURRENT_DOMAINS" | tr ',' '\n' | grep -q "^${{ inputs.domain }}$"; then
           echo "Domain ${{ inputs.domain }} already exists in QuickSight allowed domains"
         else
           echo "Adding ${{ inputs.domain }} to QuickSight allowed domains"
@@ -52,14 +68,14 @@ runs:
             echo "Read-only mode. Command that would be executed:"
             echo "UPDATED_DOMAINS: $UPDATED_DOMAINS"
             echo "aws quicksight update-namespace \
-              --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+              --aws-account-id $ACCOUNT_ID \
               --namespace default \
               --region ${{ inputs.aws-region }} \
               --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}"
           else
             # Execute the update command
             #aws quicksight update-namespace \
-            #  --aws-account-id $(aws sts get-caller-identity --query Account --output text) \
+            #  --aws-account-id $ACCOUNT_ID \
             #  --namespace default \
             #  --region ${{ inputs.aws-region }} \
             #  --quicksight-namespace-configuration AllowedDomains=${UPDATED_DOMAINS}
