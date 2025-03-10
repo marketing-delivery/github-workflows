@@ -90,5 +90,9 @@ runs:
               echo "api_subdomain=pr${{ inputs.pr-number }}" >> $GITHUB_OUTPUT
             fi
           fi
-          echo "subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          if [ -n "${{ inputs.suffix }}" ]; then
+            echo "subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          else
+            echo "subdomain=pr${{ inputs.pr-number }}" >> $GITHUB_OUTPUT
+          fi
         fi 
