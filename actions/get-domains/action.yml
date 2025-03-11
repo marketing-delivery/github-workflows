@@ -60,7 +60,11 @@ runs:
               echo "api_subdomain=uat" >> $GITHUB_OUTPUT
             fi
           fi
-          echo "subdomain=uat.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          if [ -n "${{ inputs.suffix }}" ]; then
+            echo "subdomain=uat.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          else
+            echo "subdomain=uat" >> $GITHUB_OUTPUT
+          fi
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
             if [ -n "${{ inputs.suffix }}" ]; then
@@ -75,7 +79,11 @@ runs:
               echo "api_subdomain=test" >> $GITHUB_OUTPUT
             fi
           fi
-          echo "subdomain=test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          if [ -n "${{ inputs.suffix }}" ]; then
+            echo "subdomain=test.${{ inputs.suffix }}" >> $GITHUB_OUTPUT
+          else
+            echo "subdomain=test" >> $GITHUB_OUTPUT
+          fi
         elif [ "${{ inputs.env-name }}" = "FEATURE" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
             if [ -n "${{ inputs.suffix }}" ]; then
