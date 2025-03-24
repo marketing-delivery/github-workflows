@@ -53,53 +53,53 @@ runs:
         elif [ "${{ inputs.env-name }}" = "UAT" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=${{ inputs.api-prefix }}.uat.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=${{ inputs.api-prefix }}.${{ inputs.suffix }}.uat." >> $GITHUB_OUTPUT
             else
               echo "api_subdomain=${{ inputs.api-prefix }}.uat." >> $GITHUB_OUTPUT
             fi
           else
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=uat.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=${{ inputs.suffix }}.uat." >> $GITHUB_OUTPUT
             else
               echo "api_subdomain=uat." >> $GITHUB_OUTPUT
             fi
           fi
           if [ -n "${{ inputs.suffix }}" ]; then
-            echo "subdomain=uat.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+            echo "subdomain=${{ inputs.suffix }}.uat." >> $GITHUB_OUTPUT
           else
             echo "subdomain=uat." >> $GITHUB_OUTPUT
           fi
         elif [ "${{ inputs.env-name }}" = "TEST" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=${{ inputs.api-prefix }}.test.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=${{ inputs.api-prefix }}.${{ inputs.suffix }}.test." >> $GITHUB_OUTPUT
             else
               echo "api_subdomain=${{ inputs.api-prefix }}.test." >> $GITHUB_OUTPUT
             fi
           else
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=test.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=${{ inputs.api-prefix }}.test." >> $GITHUB_OUTPUT
             else
               echo "api_subdomain=test" >> $GITHUB_OUTPUT
             fi
           fi
           if [ -n "${{ inputs.suffix }}" ]; then
-            echo "subdomain=test.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+            echo "subdomain=${{ inputs.suffix }}.test" >> $GITHUB_OUTPUT
           else
             echo "subdomain=test." >> $GITHUB_OUTPUT
           fi
         elif [ "${{ inputs.env-name }}" = "FEATURE" ]; then
           if [ -n "${{ inputs.api-prefix }}" ]; then
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.api-prefix }}.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.api-prefix }}.${{ inputs.suffix }}.test." >> $GITHUB_OUTPUT
             else
-              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.api-prefix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.api-prefix }}.test." >> $GITHUB_OUTPUT
             fi
           else
             if [ -n "${{ inputs.suffix }}" ]; then
-              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=pr${{ inputs.pr-number }}.${{ inputs.suffix }}.test." >> $GITHUB_OUTPUT
             else
-              echo "api_subdomain=pr${{ inputs.pr-number }}." >> $GITHUB_OUTPUT
+              echo "api_subdomain=pr${{ inputs.pr-number }}.test." >> $GITHUB_OUTPUT
             fi
           fi
           if [ -n "${{ inputs.suffix }}" ]; then
