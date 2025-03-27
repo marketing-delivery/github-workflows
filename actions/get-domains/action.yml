@@ -80,11 +80,11 @@ runs:
             if [ -n "${{ inputs.suffix }}" ]; then
               echo "api_subdomain=${{ inputs.api-prefix }}.test." >> $GITHUB_OUTPUT
             else
-              echo "api_subdomain=test" >> $GITHUB_OUTPUT
+              echo "api_subdomain=test." >> $GITHUB_OUTPUT
             fi
           fi
           if [ -n "${{ inputs.suffix }}" ]; then
-            echo "subdomain=${{ inputs.suffix }}.test" >> $GITHUB_OUTPUT
+            echo "subdomain=${{ inputs.suffix }}.test." >> $GITHUB_OUTPUT
           else
             echo "subdomain=test." >> $GITHUB_OUTPUT
           fi
