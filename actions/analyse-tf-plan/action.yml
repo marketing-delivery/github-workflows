@@ -1,6 +1,11 @@
 name: 'Analyze Terraform Plan'
 description: 'Analyzes terraform plan output and extracts summary and changes'
 
+inputs:
+  plan-file:
+    description: 'The path to the terraform plan file'
+    required: true
+
 outputs:
   summary:
     description: 'The plan summary line'
@@ -20,7 +25,7 @@ runs:
       shell: bash
       run: |
         # Save plan output to file
-        terraform show tf.plan > plan_output.txt
+        terraform show ${{ inputs.plan-file }} > plan_output.txt
         
         # Extract the Plan line (with more flexible matching)
         echo 'SUMMARY<<EOF' >> $GITHUB_OUTPUT
