@@ -2,8 +2,8 @@ name: 'Analyze Terraform Plan'
 description: 'Analyzes terraform plan output and extracts summary and changes'
 
 inputs:
-  plan-file:
-    description: 'The path to the terraform plan file'
+  plan-output-file:
+    description: 'The path to the output of terraform show'
     required: true
 
 outputs:
@@ -27,19 +27,13 @@ runs:
         # Output current directory for debugging
         echo "Current directory: $(pwd)"
         
-        # Initialize Terraform to ensure providers are available
-        terraform init -input=false
-        
-        # Save plan output to file
-        terraform show ${{ inputs.plan-file }} > plan_output.txt
-        
         # Extract the Plan line (with more flexible matching)
         echo 'SUMMARY<<EOF' >> $GITHUB_OUTPUT
-        grep -i "^[[:space:]]*plan:" plan_output.txt >> $GITHUB_OUTPUT || echo "No plan summary found"
+        grep -i "^[[:space:]]*plan:" ${{ inputs.plan-output-file }} >> $GITHUB_OUTPUT || echo "No plan summary found"
         echo 'EOF' >> $GITHUB_OUTPUT
         
         # Check for changes
-        if grep -q "No changes." plan_output.txt; then 
+        if grep -q "No changes." ${{ inputs.plan-output-file }}; then 
           echo "has_changes=false"
           echo "has_changes=false" >> $GITHUB_OUTPUT
         else
@@ -49,5 +43,5 @@ runs:
         
         # Extract changes section with more reliable markers
         echo 'CHANGES<<EOF' >> $GITHUB_OUTPUT
-        sed -n '/Terraform used the selected providers/,/^Plan:/{ /^Plan:/!p }' plan_output.txt >> $GITHUB_OUTPUT
+        sed -n '/Terraform used the selected providers/,/^Plan:/{ /^Plan:/!p }' ${{ inputs.plan-output-file }} >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
