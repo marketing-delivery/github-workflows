@@ -1,11 +1,6 @@
 name: 'Analyze Terraform Plan'
 description: 'Analyzes terraform plan output and extracts summary and changes'
 
-inputs:
-  plan-output:
-    description: 'The output from terraform plan'
-    required: true
-
 outputs:
   summary:
     description: 'The plan summary line'
