@@ -25,7 +25,7 @@ runs:
       shell: bash
       run: |
         # Save plan output to file
-        echo '${{ inputs.plan-output }}' > plan_output.txt
+        terraform show tf.plan > plan_output.txt
         
         # Extract the Plan line (with more flexible matching)
         echo 'SUMMARY<<EOF' >> $GITHUB_OUTPUT
