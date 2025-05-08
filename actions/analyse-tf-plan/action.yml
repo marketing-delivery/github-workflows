@@ -24,6 +24,12 @@ runs:
       id: analyse-tf-plan
       shell: bash
       run: |
+        # Output current directory for debugging
+        echo "Current directory: $(pwd)"
+        
+        # Initialize Terraform to ensure providers are available
+        terraform init -input=false
+        
         # Save plan output to file
         terraform show ${{ inputs.plan-file }} > plan_output.txt
         
