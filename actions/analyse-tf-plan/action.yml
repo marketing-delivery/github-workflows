@@ -34,9 +34,8 @@ runs:
         fi
         
         # Extract the Plan line (with more flexible matching)
-        echo "summary<<EOF" >> $GITHUB_OUTPUT
-        grep -i "^[[:space:]]*plan:" "${{ inputs.plan-output-file }}" >> $GITHUB_OUTPUT || echo "No plan summary found"
-        echo "EOF" >> $GITHUB_OUTPUT
+        SUMMARY=$(grep -i "^[[:space:]]*plan:" "${{ inputs.plan-output-file }}" || echo "No plan summary found")
+        echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
         
         # Check for changes
         if grep -q "No changes." "${{ inputs.plan-output-file }}"; then 
@@ -45,7 +44,6 @@ runs:
           echo "has_changes=true" >> $GITHUB_OUTPUT
         fi
         
-        # Extract changes section with more reliable markers
-        echo "changes<<EOF" >> $GITHUB_OUTPUT
-        sed -n '/Terraform used the selected providers/,/^Plan:/{ /^Plan:/!p }' "${{ inputs.plan-output-file }}" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        # For the changes section, we'll use base64 encoding to avoid multiline issues
+        CHANGES=$(sed -n '/Terraform used the selected providers/,/^Plan:/{ /^Plan:/!p }' "${{ inputs.plan-output-file }}" | base64 -w 0)
+        echo "changes=${CHANGES}" >> $GITHUB_OUTPUT
