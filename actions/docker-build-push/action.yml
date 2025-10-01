@@ -33,6 +33,5 @@ runs:
         docker push ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:${{ inputs.image-tag }}
         
         if [[ ${{ inputs.env-name }} == PROD ]]; then
-          docker tag ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:${{ inputs.image-tag }} ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:latest
-          docker push ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:latest
+          docker tag ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}:${{ inputs.image-tag }} ${{ inputs.ecr-registry }}/${{ inputs.ecr-repository }}
         fi 
